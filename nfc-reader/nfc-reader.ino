@@ -36,11 +36,13 @@ void setup() {
   webSocket.beginSSL(SERVER_IP.c_str(), SERVER_PORT.toInt(), "/");
   webSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
     switch(type) {
-      case WStype_CONNECTED:
+      case WStype_CONNECTED: {
         Serial.println("WebSocket connected");
         // Register this reader with the server using a predefined id
-        webSocket.sendTXT("{\"event\":\"register\",\"id\":\"" + readerId + "\"}");
+        String payload = "{\"event\":\"register\",\"id\":\"" + readerId + "\"}";
+        webSocket.sendTXT(payload);
         break;
+        }
       case WStype_DISCONNECTED:
         Serial.println("WebSocket disconnected");
         break;
