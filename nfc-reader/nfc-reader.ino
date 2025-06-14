@@ -30,7 +30,9 @@ void setup() {
   Serial.println(" connected!");
 
   // Initialize WebSocket connection
-  webSocket.beginSSL(SERVER_URL, SERVER_PORT.toInt(), "/");
+  // SERVER_URL is defined as a String in secrets.h, but beginSSL expects a
+  // const char*. Use c_str() to convert the String to the expected type.
+  webSocket.beginSSL(SERVER_URL.c_str(), SERVER_PORT.toInt(), "/");
   webSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
     switch(type) {
       case WStype_CONNECTED:
