@@ -4,7 +4,7 @@ This repository contains all code for a simple WebSocket-based server and a comp
 
 ```
 concorde-full/
-├── concorde-controller/  # Node.js WebSocket server
+├── concorde-controller/  # TypeScript WebSocket server
 ├── nfc-reader/           # ESP8266/PN532 based NFC reader project
 ```
 
@@ -17,7 +17,7 @@ The server lives in `concorde-controller`. Install dependencies with npm and sta
 ```bash
 cd concorde-controller
 npm install
-node index.js
+npm start
 ```
 
 The server requires the following environment variables (see `.env.example`):
