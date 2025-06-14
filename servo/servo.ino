@@ -10,6 +10,9 @@ const String ssid = WIFI_SSID;
 const String password = WIFI_PASSWORD;
 const String servoId = SERVO_ID;
 WebSocketsClient webSocket;
+bool isSpinning = false;
+int currentPos = 0;
+int stepDir = 1;
 
 void setup() {
     Serial.begin(115200);
@@ -40,6 +43,14 @@ void setup() {
         break;
       case WStype_TEXT:
         Serial.printf("WS Message: %s\n", payload);
+        if (strstr((char*)payload, "start_spin")) {
+          isSpinning = true;
+        } else if (strstr((char*)payload, "stop_spin")) {
+          isSpinning = false;
+          currentPos = 0;
+          stepDir = 1;
+          myservo.write(0);
+        }
         break;
       default:
         break;
@@ -59,15 +70,19 @@ void setup() {
 }
 
 void loop() {
-  // Sweep from 0 to 180
-  for (int pos = 0; pos <= 180; pos++) {
-    myservo.write(pos);
+  webSocket.loop();
+  if (isSpinning) {
+    myservo.write(currentPos);
+    currentPos += stepDir;
+    if (currentPos >= 180) {
+      currentPos = 180;
+      stepDir = -1;
+    } else if (currentPos <= 0) {
+      currentPos = 0;
+      stepDir = 1;
+    }
     delay(5);
-  }
-
-  // Sweep back from 180 to 0
-  for (int pos = 180; pos >= 0; pos--) {
-    myservo.write(pos);
-    delay(5);
+  } else {
+    delay(10);
   }
 }
