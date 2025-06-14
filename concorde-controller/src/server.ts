@@ -58,6 +58,10 @@ export function startServer() {
             clients.send('register', 'SERVO_1', JSON.stringify({ event, id: 'SERVO_1' }));
           }
           break;
+        case 'magnet':
+          console.log(`Magnet ${data.id} state: ${data.state}`);
+          clients.broadcast('setup', JSON.stringify({ event: 'magnet', id: data.id, state: data.state }));
+          break;
         default:
           console.log('Received event:', data.event);
           break;
