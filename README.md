@@ -6,6 +6,8 @@ This repository contains all code for a simple WebSocket-based server and a comp
 concorde-full/
 ├── concorde-controller/  # TypeScript WebSocket server
 ├── nfc-reader/           # ESP8266/PN532 based NFC reader project
+├── magnet-reader/        # ESP8266 based reed switch sensor
+├── servo/                # WebSocket controllable servo example
 ```
 
 ## Getting Started
@@ -41,4 +43,21 @@ The `nfc-reader` folder contains an Arduino sketch (`nfc-reader.ino`) built for 
 ```
 
 Build and upload the sketch to your microcontroller, then open the serial monitor to verify that it connects.
+
+### Magnet Reader
+
+`magnet-reader` provides a simple reed switch sensor that reports its open/closed
+state over WebSockets. Create a `secrets.h` file with Wi‑Fi and server details
+similar to the NFC reader:
+
+```
+#define WIFI_SSID "your-ssid"
+#define WIFI_PASSWORD "your-password"
+#define SERVER_IP "your.server"
+#define SERVER_PORT "3000"
+#define MAGNET_ID "magnet-01"
+```
+
+When the reed switch changes state the sketch sends a `magnet` event to the
+Concorde controller indicating whether the cabinet is `open` or `closed`.
 
