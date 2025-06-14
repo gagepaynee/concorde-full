@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
+#include <WebSocketsClient.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
 #include "secrets.h"
@@ -8,13 +8,13 @@
 const String ssid = WIFI_SSID;
 const String password = WIFI_PASSWORD;
 
-const String serverUrl = SERVER_URL+":"+SERVER_PORT;  // Change to your Pi's IP + endpoint
 
 ///////////////////////
 // NFC Setup
 ///////////////////////
 PN532_I2C pn532_i2c(Wire);
 PN532 nfc(pn532_i2c);
+WebSocketsClient webSocket;
 
 void setup() {
   Serial.begin(115200);
@@ -29,6 +29,25 @@ void setup() {
   }
   Serial.println(" connected!");
 
+  // Initialize WebSocket connection
+  webSocket.beginSSL(SERVER_URL, atoi(SERVER_PORT), "/");
+  webSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
+    switch(type) {
+      case WStype_CONNECTED:
+        Serial.println("WebSocket connected");
+        break;
+      case WStype_DISCONNECTED:
+        Serial.println("WebSocket disconnected");
+        break;
+      case WStype_TEXT:
+        Serial.printf("WS Message: %s\n", payload);
+        break;
+      default:
+        break;
+    }
+  });
+  webSocket.setReconnectInterval(5000);
+
   // NFC init
   nfc.begin();
   uint32_t version = nfc.getFirmwareVersion();
@@ -41,6 +60,7 @@ void setup() {
 }
 
 void loop() {
+  webSocket.loop();
   uint8_t uid[7];
   uint8_t uidLength;
 
@@ -65,21 +85,12 @@ void loop() {
 }
 
 void sendUIDtoServer(String uid) {
-  if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient client;               // Step 1: Create WiFiClient
-    HTTPClient http;
-
-    http.begin(client, serverUrl);   // Step 2: Use new begin() signature
-    http.addHeader("Content-Type", "application/json");
-
+  if (WiFi.status() == WL_CONNECTED && webSocket.isConnected()) {
     String payload = "{\"uid\":\"" + uid + "\"}";
-    int response = http.POST(payload);
-
-    Serial.print("Sent to server. Status: ");
-    Serial.println(response);
-    http.end();
+    webSocket.sendTXT(payload);
+    Serial.println("UID sent over WebSocket");
   } else {
-    Serial.println("WiFi not connected. Cannot send UID.");
+    Serial.println("WiFi/WebSocket not connected. Cannot send UID.");
   }
 }
 
