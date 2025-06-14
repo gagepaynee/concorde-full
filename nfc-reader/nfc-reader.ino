@@ -79,7 +79,8 @@ void loop() {
   uint8_t uid[7];
   uint8_t uidLength;
 
-  if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 1000)) {
+  // Poll quickly so the WebSocket client can continue handling reconnects
+  if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
     Serial.print("Tag UID: ");
     String uidStr = "";
     for (uint8_t i = 0; i < uidLength; i++) {
@@ -92,12 +93,14 @@ void loop() {
     sendUIDtoServer(uidStr);
 
     // Wait for tag removal before reading again
-    while (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
+    while (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 50)) {
       webSocket.loop();
-      delay(100);
+      delay(50);
     }
     Serial.println("Tag removed. Waiting for next...");
   }
+  // Small delay so webSocket.loop() runs often even when no tag is present
+  delay(10);
 }
 
 void sendUIDtoServer(String uid) {
