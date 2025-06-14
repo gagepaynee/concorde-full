@@ -30,7 +30,7 @@ void setup() {
   Serial.println(" connected!");
 
   // Initialize WebSocket connection
-  webSocket.beginSSL(SERVER_URL, atoi(SERVER_PORT), "/");
+  webSocket.beginSSL(SERVER_URL, SERVER_PORT.toInt(), "/");
   webSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
     switch(type) {
       case WStype_CONNECTED:
