@@ -1,4 +1,4 @@
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'https';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -6,8 +6,8 @@ import dotenv from 'dotenv';
 dotenv.config()
 
 const options = {
-  key: fs.readFileSync(process.env.KEY_PATH),
-  cert: fs.readFileSync(process.env.CERT_PATH),
+  key: fs.readFileSync(process.env.KEY_PATH as string),
+  cert: fs.readFileSync(process.env.CERT_PATH as string),
 };
 
 // Respond to HTTP(S) requests too
@@ -16,13 +16,19 @@ const server = createServer(options, (req, res) => {
   res.end('WebSocket server is running');
 });
 
-server.listen(process.env.PORT, '0.0.0.0', () => {
-  console.log(`Server listening on PORT: ${process.env.PORT}` );
+const port = Number(process.env.PORT || 0);
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening on PORT: ${port}` );
 });
+
+interface ExtendedWebSocket extends WebSocket {
+  uid?: string;
+  role?: string;
+}
 
 const wss = new WebSocketServer({ server });
 
-function registerSocket(socket, id, event) {
+function registerSocket(socket: ExtendedWebSocket, id: string, event: string): void {
   console.log(`${event}: `, id);
   socket.uid = id;
   socket.role = event;
@@ -31,9 +37,10 @@ function registerSocket(socket, id, event) {
   // Notify all setup sockets when a client registers successfully
   if (event === 'register') {
     wss.clients.forEach((client) => {
-      if (client.role === 'setup') {
+      const wsClient = client as ExtendedWebSocket;
+      if (wsClient.role === 'setup') {
         console.log('sending');
-        client.send(message);
+        wsClient.send(message);
       }
     });
   }
@@ -41,7 +48,7 @@ function registerSocket(socket, id, event) {
   socket.send(message);
 }
 
-wss.on('connection', (socket) => {
+wss.on('connection', (socket: ExtendedWebSocket) => {
   socket.on('message', (message) => {
     let data;
     try {
@@ -63,8 +70,9 @@ wss.on('connection', (socket) => {
       case 'unlocked':
         console.log('unlock: ', data.id);
         wss.clients.forEach((client) => {
-          if (client.uid === data.id) {
-            client.send(JSON.stringify({ event: 'unlocked', id: data.id }));
+          const wsClient = client as ExtendedWebSocket;
+          if (wsClient.uid === data.id) {
+            wsClient.send(JSON.stringify({ event: 'unlocked', id: data.id }));
           }
         });
         break;
