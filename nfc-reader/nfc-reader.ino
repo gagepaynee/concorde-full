@@ -7,6 +7,7 @@
 
 const String ssid = WIFI_SSID;
 const String password = WIFI_PASSWORD;
+const String readerId = READER_ID;
 
 
 ///////////////////////
@@ -37,6 +38,8 @@ void setup() {
     switch(type) {
       case WStype_CONNECTED:
         Serial.println("WebSocket connected");
+        // Register this reader with the server using a predefined id
+        webSocket.sendTXT("{\"event\":\"register\",\"id\":\"" + readerId + "\"}");
         break;
       case WStype_DISCONNECTED:
         Serial.println("WebSocket disconnected");
@@ -97,7 +100,7 @@ void loop() {
 
 void sendUIDtoServer(String uid) {
   if (WiFi.status() == WL_CONNECTED && webSocket.isConnected()) {
-    String payload = "{\"uid\":\"" + uid + "\"}";
+    String payload = "{\"event\":\"nfc\",\"id\":\"" + readerId + "\",\"uuid\":\"" + uid + "\"}";
     webSocket.sendTXT(payload);
     Serial.println("UID sent over WebSocket");
   } else {

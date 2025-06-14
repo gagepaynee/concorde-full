@@ -69,6 +69,10 @@ wss.on('connection', (socket) => {
         });
         break;
 
+      case 'nfc':
+        console.log(`Reader with id ${data.id} just read: ${data.uuid}`);
+        break;
+
       default:
         console.log('Received event:', data.event);
         break;

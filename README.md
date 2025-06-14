@@ -35,8 +35,9 @@ The `nfc-reader` folder contains an Arduino sketch (`nfc-reader.ino`) built for 
 ```
 #define WIFI_SSID "your-ssid"
 #define WIFI_PASSWORD "your-password"
-#define SERVER_URL "your.server"
+#define SERVER_IP "your.server"
 #define SERVER_PORT "3000"
+#define READER_ID "reader-01"
 ```
 
 Build and upload the sketch to your microcontroller, then open the serial monitor to verify that it connects.
