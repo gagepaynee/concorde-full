@@ -1,0 +1,4 @@
+secrets.h
+.env
+node_modules
+*.pem

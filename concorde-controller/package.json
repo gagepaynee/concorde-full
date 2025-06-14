@@ -1,0 +1,25 @@
+{
+  "name": "concorde-escape-room-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gagepaynee/concorde-escape-room-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gagepaynee/concorde-escape-room-api/issues"
+  },
+  "homepage": "https://github.com/gagepaynee/concorde-escape-room-api#readme",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "ws": "^8.18.2"
+  },
+  "type": "module"
+}
