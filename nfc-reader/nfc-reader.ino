@@ -50,6 +50,14 @@ void setup() {
   });
   webSocket.setReconnectInterval(5000);
 
+  // Wait until the WebSocket connection is established before proceeding
+  Serial.print("Connecting to WebSocket...");
+  while (!webSocket.isConnected()) {
+    webSocket.loop();
+    delay(100);
+  }
+  Serial.println(" connected!");
+
   // NFC init
   nfc.begin();
   uint32_t version = nfc.getFirmwareVersion();
@@ -80,6 +88,7 @@ void loop() {
 
     // Wait for tag removal before reading again
     while (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
+      webSocket.loop();
       delay(100);
     }
     Serial.println("Tag removed. Waiting for next...");
@@ -93,6 +102,8 @@ void sendUIDtoServer(String uid) {
     Serial.println("UID sent over WebSocket");
   } else {
     Serial.println("WiFi/WebSocket not connected. Cannot send UID.");
+    // give the WebSocket client a chance to reconnect
+    webSocket.loop();
   }
 }
 
