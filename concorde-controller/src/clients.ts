@@ -17,6 +17,7 @@ export class ClientManager {
     this.clients.get(role)!.set(id, socket);
     socket.id = id;
     socket.role = role;
+    console.log(`register: ${id}`)
   }
 
   unregister(socket: ManagedWebSocket) {
