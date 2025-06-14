@@ -27,6 +27,7 @@ interface ExtendedWebSocket extends WebSocket {
 }
 
 const wss = new WebSocketServer({ server });
+let servoSpinning = false;
 
 function registerSocket(socket: ExtendedWebSocket, id: string, event: string): void {
   console.log(`${event}: `, id);
@@ -79,6 +80,16 @@ wss.on('connection', (socket: ExtendedWebSocket) => {
 
       case 'nfc':
         console.log(`Reader with id ${data.id} just read: ${data.uuid}`);
+        if (data.id === 'NFC_1' && data.uuid === '04:ac:09:6a:06:1f:94') {
+          servoSpinning = !servoSpinning;
+          const event = servoSpinning ? 'start_spin' : 'stop_spin';
+          wss.clients.forEach((client) => {
+            const wsClient = client as ExtendedWebSocket;
+            if (wsClient.uid === 'SERVO_1') {
+              wsClient.send(JSON.stringify({ event, id: wsClient.uid }));
+            }
+          });
+        }
         break;
 
       default:
