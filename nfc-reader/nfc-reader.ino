@@ -54,6 +54,9 @@ void setup() {
     }
   });
   webSocket.setReconnectInterval(5000);
+  // Send pings periodically so we detect broken connections
+  // If two pings fail the client will disconnect and trigger a reconnect
+  webSocket.enableHeartbeat(15000, 3000, 2);
 
   // Wait until the WebSocket connection is established before proceeding
   Serial.print("Connecting to WebSocket...");
