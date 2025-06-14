@@ -22,7 +22,7 @@ server.listen(process.env.PORT, '0.0.0.0', () => {
 
 const wss = new WebSocketServer({ server });
 
-function registerSocket(socket, id, event) {
+export function registerSocket(socket, id, event, wssInstance = wss) {
   console.log(`${event}: `, id);
   socket.uid = id;
   socket.role = event;
@@ -30,7 +30,7 @@ function registerSocket(socket, id, event) {
 
   // Notify all setup sockets when a client registers successfully
   if (event === 'register') {
-    wss.clients.forEach((client) => {
+    wssInstance.clients.forEach((client) => {
       if (client.role === 'setup') {
         console.log('sending');
         client.send(message);
