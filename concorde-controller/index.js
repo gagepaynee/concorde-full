@@ -5,6 +5,14 @@ import dotenv from 'dotenv';
 
 dotenv.config()
 
+const requiredVars = ['KEY_PATH', 'CERT_PATH', 'PORT'];
+for (const name of requiredVars) {
+  if (!process.env[name]) {
+    console.error(`Missing environment variable: ${name}`);
+    process.exit(1);
+  }
+}
+
 const options = {
   key: fs.readFileSync(process.env.KEY_PATH),
   cert: fs.readFileSync(process.env.CERT_PATH),
