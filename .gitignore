@@ -1,4 +1,5 @@
-secrets.h
+**/secrets.h
+shared/shared_secrets.h
 .env
 node_modules
 *.pem

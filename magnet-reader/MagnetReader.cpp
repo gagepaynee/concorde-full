@@ -1,35 +1,33 @@
+#include "MagnetReader.h"
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>
-#include "secrets.h"
+#include "../shared/shared_secrets.h"
 
-#define REED_PIN D5  // GPIO14
+#define REED_PIN D5
 
-WebSocketsClient webSocket;
-bool lastState = HIGH;
+static String magnetId;
+static WebSocketsClient webSocket;
+static bool lastState = HIGH;
 
-const String ssid = WIFI_SSID;
-const String password = WIFI_PASSWORD;
-const String magnetId = MAGNET_ID;
-
-void setup() {
-  pinMode(REED_PIN, INPUT_PULLUP);  // use internal pull-up
+void magnetReaderSetup(const String &deviceId) {
+  magnetId = deviceId;
+  pinMode(REED_PIN, INPUT_PULLUP);
   Serial.begin(115200);
 
   Serial.print("Connecting to WiFi...");
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print('.');
   }
   Serial.println(" connected!");
 
-  // SERVER_IP is defined as a String in secrets.h, but beginSSL expects a const char*
-  webSocket.beginSSL(SERVER_IP.c_str(), SERVER_PORT.toInt(), "/");
+  webSocket.beginSSL(SERVER_IP, atoi(SERVER_PORT), "/");
   webSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
     switch(type) {
       case WStype_CONNECTED: {
         Serial.println("WebSocket connected");
-        String payload = "{\"event\":\"register\",\"id\":\"" + magnetId + "\"}";
+        String payload = String("{\"event\":\"register\",\"id\":\"") + magnetId + "\"}";
         webSocket.sendTXT(payload);
         break;
       }
@@ -54,7 +52,17 @@ void setup() {
   Serial.println(" connected!");
 }
 
-void loop() {
+static void sendStateToServer(String state) {
+  if (WiFi.status() == WL_CONNECTED && webSocket.isConnected()) {
+    String payload = String("{\"event\":\"magnet\",\"id\":\"") + magnetId + "\",\"state\":\"" + state + "\"}";
+    webSocket.sendTXT(payload);
+  } else {
+    Serial.println("WiFi/WebSocket not connected. Cannot send state.");
+    webSocket.loop();
+  }
+}
+
+void magnetReaderLoop() {
   webSocket.loop();
   bool currentState = digitalRead(REED_PIN);
 
@@ -64,16 +72,5 @@ void loop() {
     sendStateToServer(stateStr);
     lastState = currentState;
   }
-
-  delay(50); // debounce delay
-}
-
-void sendStateToServer(String state) {
-  if (WiFi.status() == WL_CONNECTED && webSocket.isConnected()) {
-    String payload = "{\"event\":\"magnet\",\"id\":\"" + magnetId + "\",\"state\":\"" + state + "\"}";
-    webSocket.sendTXT(payload);
-  } else {
-    Serial.println("WiFi/WebSocket not connected. Cannot send state.");
-    webSocket.loop();
-  }
+  delay(50);
 }
