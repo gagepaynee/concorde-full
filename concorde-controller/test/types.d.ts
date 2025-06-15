@@ -1,0 +1,9 @@
+declare module 'fs';
+declare module 'https';
+declare module 'ws';
+declare module 'dotenv';
+declare module 'events';
+declare module 'path';
+declare module 'url';
+declare module 'node:test';
+declare module 'node:assert/strict';
