@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "build",
+    "noImplicitAny": false,
+    "strict": false
+  },
+  "include": ["index.ts", "src/**/*.ts", "test/**/*.ts"],
+  "files": ["test/types.d.ts"]
+}
